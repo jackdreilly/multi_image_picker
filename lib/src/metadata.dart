@@ -954,11 +954,25 @@ double _castAsDouble(dynamic variable) {
   if (variable == null) {
     return null;
   }
-
-  if (variable is int) {
+  if (variable is num) {
     return variable.toDouble();
   }
-  return (!(variable is double)) ? double.parse(variable.toString()) : variable;
+  final string = variable.toString();
+  final parse = double.tryParse(string);
+  if (parse != null) {
+    return parse;
+  }
+  // This might be a (numerator) / (denominator) string.
+  try {
+    final splits = variable.split('/');
+    if (splits.length != 2) {
+      return null;
+    }
+    final ints = splits.map((e) => int.parse(e.trim()));
+    return ints.first.toDouble() / ints.last;
+  } catch (_) {
+    return null;
+  }
 }
 
 String _castAsString(dynamic variable) {
